@@ -12,7 +12,7 @@ It supports the nunjucks syntax and a subset of its command {{var}} {%for %} {%i
 The use case is.  
 
 1) Add the vars you want replace to the HTML file
-2) Make an AJAX call get
+2) Make an AJAX call
 3) process the Dom and replace vars with the data in the ajax result
 
 
@@ -30,26 +30,28 @@ var jdp = (function() {
     function checkElement(elementObj) {
         //create the patterns;
         var regexBrackets = new RegExp('\{%([^)]+)\%}');
-        //note: for some reason this regExp searching for "for" is not working so using the index of for now
-        var regexFor = new RegExp('\b(\w*for\w*)\b');
+        var regexFor = new RegExp(/\b(\w*for\w*)\b/);
         //look for a bracket {% to %}
         var isBracket = regexBrackets.test(elementObj.innerText);
         if (isBracket == true) {
             //now we found a bracket lets see if we can match it against a reserved word
-            //to-do: we can use a regex to search for this a little more elegantly.
-            var isFor = elementObj.innerText.indexOf('for');
+            var isFor = regexFor.test(elementObj.innerText);
             //debug
             //console.log("isFor");
             //console.log(isFor);
-            if (isFor == -1) {
-                //to-do: not for so check for an if
+            if (isFor == true) {
+                //to-do: process for
+                return (true)
             } else {
-                //it is a for so process it.
-                //console.log(elementObj.innerText)
+                //it is not a for loop so check or an if
+                //to-do: process if 
+                return (false);
             }
+        } else {
+            //it had no brackets do we do not care about it at this point
+            return (false)
         }
-        //send false for now until the parsing function is ready
-        return (false);
+        //return (false);
     }
     //this function replaces the place holder {{var}} with the data in the results obj
     function replacePlaceHolder(elementObj, theElement, data) {
@@ -94,8 +96,11 @@ var jdp = (function() {
             for (var i = 0; i < elems.length; i++) {
                 //process the element
                 var elementObj = processElement(elems[i]);
+                //debug
+                //console.log(elementObj)
                 var res = checkElement(elementObj);
                 //if we did not find a reserved word we just want to process it as normal
+                console.log(res)
                 if (res == false) {
                     replacePlaceHolder(elementObj, elems[i], data)
                 }
