@@ -1,0 +1,32 @@
+<html lang="en">
+    <head>
+    </head>
+    <body>
+    	<!-- standard div-->
+        <div style="display:none">
+            {{first}}
+        </div>
+        <!-- standard div-->
+        <span style="display:none">{{second}}</span>       
+        <!-- for loop -->
+        <div style="display:none">
+            {% for %}
+        </div>
+        <!-- if statement -->
+        <div style="display:none">
+            {% if %}
+        </div>
+        <!-- load the framework -->
+        <script type="text/javascript" src="jdp.js"></script>
+
+        <script>
+            window.onload = function() {
+            	//set some data
+            	//note: this will be replaced with a results array.
+				var arr = [{'first':'this is the data','second':'this is the second'}];
+				//refresh the dom with the data
+				jdp.refreshDom(arr)
+			}
+        </script>
+    </body>
+</html>
