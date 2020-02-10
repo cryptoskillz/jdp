@@ -10,11 +10,15 @@
         <span style="display:none">{{second}}</span>       
         <!-- for loop -->
         <div style="display:none">
-            {% for %}
+            {% for item in array %}
+                <h2><span class="d-inline-block">{{item.first}} | {{item.second}}</span></h2>
+            {% endfor %}
         </div>
         <!-- if statement -->
         <div style="display:none">
-            {% if %}
+            {% if first == "hello" %}
+                <span>first Details {{first}}
+            {% endif %}
         </div>
         <!-- load the framework -->
         <script type="text/javascript" src="jdp.js"></script>
@@ -23,7 +27,7 @@
             window.onload = function() {
             	//set some data
             	//note: this will be replaced with a results array.
-				var arr = [{'first':'this is the data','second':'this is the second'}];
+				var arr = [{'first':'this is the data','second':'this is the second'},{'first':'this row 2 first','second':'this row2 second data'}];
 				//refresh the dom with the data
 				jdp.refreshDom(arr)
 			}

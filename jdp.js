@@ -28,33 +28,37 @@ var jdp = (function() {
     //this function checks to see if the element contains a reserved word if, else, for
     //note: this function is very much in Dev IE it does not work yet
     function checkElement(elementObj) {
+        //note: we can clean up this process if we ever add more method for 3 it is fine.
         //create the patterns;
         var regexBrackets = new RegExp('\{%([^)]+)\%}');
         var regexFor = new RegExp(/\b(\w*for\w*)\b/);
+        var regexIf = new RegExp(/\b(\w*if\w*)\b/);
+        var regexElse = new RegExp(/\b(\w*else\w*)\b/);
         //look for a bracket {% to %}
         var isBracket = regexBrackets.test(elementObj.innerText);
         if (isBracket == true) {
             //now we found a bracket lets see if we can match it against a reserved word
             var isFor = regexFor.test(elementObj.innerText);
-            //debug
-            //console.log("isFor");
-            //console.log(isFor);
-            if (isFor == true) {
-                //to-do: process for
-                return (true)
-            } else {
-                //it is not a for loop so check or an if
-                //to-do: process if 
-                return (false);
+            if (isFor == true) return ("for")
+            else {
+                //check if it is an if
+                var isIf = regexIf.test(elementObj.innerText);
+                if (isIf == true) return ("if")
+                else return (false)
             }
-        } else {
-            //it had no brackets do we do not care about it at this point
-            return (false)
+        } else return (false);
+    }
+
+    function replacePlaceHolderHTML(html, dataObj) {
+        //loop through the key value pairs
+        for (var key in dataObj) {
+            //check we have a key
+            if (dataObj.hasOwnProperty(key)) html = html.replace("{{" + key + "}}", dataObj[key])
         }
-        //return (false);
+        return (html)
     }
     //this function replaces the place holder {{var}} with the data in the results obj
-    function replacePlaceHolder(elementObj, theElement, data) {
+    function replacePlaceHolderData(elementObj, theElement, data) {
         //loop throoguh the data element
         for (var i = 0; i < data.length; i++) {
             //get the data obj we are looking to replace
@@ -84,11 +88,59 @@ var jdp = (function() {
         var obj = {}
         //get the inner text and store it as is
         obj.innerText = theElement.innerText;
+        //get the innet html 
+        obj.innerHTML = theElement.innerHTML;
         //get the inner text and trim it
         obj.text = theElement.innerText.replace(/^\s+|\s+$/g, "").toString();
         //get the taganme and make it lowercase to make it easier to use
         obj.tagname = theElement.tagName.toLowerCase();
         return (obj);
+    }
+
+    function processFor(elementObj, theElement, data) {
+        /*
+        grab all the data between the for and the end for.
+        Note:   as we have a really simple for loop here we can make all sorts of assumpations that allow us to 
+                code it in a realtively simple way.  We assume it is for item in array as that is all we support 
+                at present.  In the future as we make this a more functiom, rangers, increment counters etc we 
+                will remove these assumpations
+        */
+        //get the data between the for and the end for
+        var re = /(.*%}\s+)(.*)(\s+{% endfor %}.*)/;
+        //replace it
+        var tmpHtml = elementObj.innerHTML.replace(re, "$2");
+        //replace and item. (again assumpations)
+        tmpHtml = tmpHtml.replace(/item./g, "");
+        //empty the innerHTML as we are going to replace it.
+        //note: we will have to update this as we want to keep this HTML for soft refreh's
+        elementObj.innerHTML = "";
+        for (var i = 0; i < data.length; i++) {
+            //get the data obj we are looking to replace
+            var dataObj = data[i];
+            var html = replacePlaceHolderHTML(tmpHtml, dataObj)
+            elementObj.innerHTML = elementObj.innerHTML + html;
+        }
+        if ((theElement.style.display === 'none') && elementObj.innerHTML != "") {
+            theElement.innerHTML = elementObj.innerHTML;
+            theElement.style.display = "block";
+        }
+    }
+
+    function processIf(elementObj, theElement, data) {
+        //console.log(elementObj)
+        //get the data between the if statement
+        var re = /(.*{% if\s+)(.*)(\s+%}.*)/;
+        var toChar = /^(.*?)%}/
+        //get the if statement
+        //note: this can be cleaner
+        //let result0 = elementObj.innerHTML.match(/(.*{% if\s+)(.*)(\s+%}.*)/);
+        let result = elementObj.innerHTML.match(/.+?(?=\%})/);
+        //get the first result
+        var ifStatement = result[0].trim();
+        //remove the junk
+        ifStatement = ifStatement.replace("{% endif","");
+        ifStatement = ifStatement.replace("{%","");
+        console.log(ifStatement;
     }
     return {
         refreshDom: function(data) {
@@ -96,13 +148,22 @@ var jdp = (function() {
             for (var i = 0; i < elems.length; i++) {
                 //process the element
                 var elementObj = processElement(elems[i]);
-                //debug
-                //console.log(elementObj)
                 var res = checkElement(elementObj);
                 //if we did not find a reserved word we just want to process it as normal
-                console.log(res)
                 if (res == false) {
-                    replacePlaceHolder(elementObj, elems[i], data)
+                    replacePlaceHolderData(elementObj, elems[i], data)
+                } else {
+                    //process the commands
+                    switch (res) {
+                        case "for":
+                            processFor(elementObj, elems[i], data)
+                            break;
+                        case "if":
+                            processIf(elementObj, elems[i], data)
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
