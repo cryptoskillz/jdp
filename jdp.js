@@ -23,6 +23,8 @@ process else
 
 */
 var jdp = (function() {
+    //get the html element
+    var html = document.documentElement.outerHTML
     //get the Dom elements
     var elems = document.body.getElementsByTagName("*");
     //this function checks to see if the element contains a reserved word if, else, for
@@ -138,12 +140,61 @@ var jdp = (function() {
         //get the first result
         var ifStatement = result[0].trim();
         //remove the junk
-        ifStatement = ifStatement.replace("{% endif","");
-        ifStatement = ifStatement.replace("{%","");
-        console.log(ifStatement;
+        ifStatement = ifStatement.replace("{% endif", "");
+        ifStatement = ifStatement.replace("{%", "");
+        console.log(ifStatement);
+    }
+
+    function parseDom(data) {
+        for (var i = 0; i < html.length; i++) {
+
+            //look for {%
+            if ((html.charAt(i) == '{') && (html.charAt(i+1) == "%")) {
+                //it is a for or an if
+                while (html.charAt(i) != "}") {
+                    let statement="";
+                    while (html.charAt(i) != "}") {
+                        statement=statement+html.charAt(i)
+                        //i2++;
+                        i++;
+                    }
+                    if (statement != "")
+                    {
+                        //check if it is a for or an if
+                        console.log(i)
+                        console.log(statement)
+                    }
+                }
+            }
+            else
+            {
+                //look for vars
+                if ((html.charAt(i) == '{') && (html.charAt(i+1) == "{")) {
+                    i=i+2;
+                    //let i2=;
+                    let statement="";
+                    console.log('in')
+                    while (html.charAt(i) != "}") {
+                        statement=statement+html.charAt(i)
+                        //i2++;
+                        i++;
+                    }
+                    if (statement != "")
+                    {
+                        console.log(i)
+                        console.log(statement)
+                    }
+                }
+                //console.log(html.charAt(i));
+            }
+
+            
+        }
     }
     return {
         refreshDom: function(data) {
+            parseDom(data)
+            return;
             //loop through them
             for (var i = 0; i < elems.length; i++) {
                 //process the element
