@@ -26,21 +26,21 @@ var jdp = (function() {
     var jdpSyntax = [];
     //get the Dom elements
     var elems = document.body.getElementsByTagName("*");
-    //this function checks to see if the element contains a reserved word if, else, for
-    //note: this function is very much in Dev IE it does not work yet
-    function checkElement(statement) {
-        //note: we can clean up this process if we ever add more method for 3 it is fine.
-        //create the patterns;
-        var regexFor = new RegExp(/\b(\w*endfor\w*)\b/);
-        var regexIf = new RegExp(/\b(\w*endif\w*)\b/);
-        var isFor = regexFor.test(statement);
-        if (isFor == true) return ("for")
-        else {
-            //check if it is an if
-            var isIf = regexIf.test(statement);
-            if (isIf == true) return ("if")
-            else return (false)
-        }
+
+    function processExpression(statement)
+    {
+        //get the first line
+        var expression = statement.split("%}")
+        //remove the white space
+        expression[0] = expression[0].trim();
+        //remove the starting junk
+        expression[0] = expression[0].replace("{%","")
+        //split up the conditional
+        var expression2 = expression[0].split(" ")
+        //remove the empty strings
+        expression2 = expression2.filter(item => item);
+        //return it.
+        return(expression2)
     }
 
     function parseDom(data) {
@@ -70,13 +70,19 @@ var jdp = (function() {
                         i++;
                     }
                     //add to the syntax array
-                    let expression = checkElement(statement);
+                    let expression = processExpression(statement);
                     //build the object
                     let tmpObj = {
                         type: "condtion",
-                        expression: expression,
+                        condtion1:expression[0],
+                        condtion2:expression[1],
+                        condtion3:expression[2],
+                        condtion4:expression[3],
                         raw: statement
                     }
+
+                    
+                    
                     jdpSyntax.push(tmpObj)
                 } else {
                     //look for vars
