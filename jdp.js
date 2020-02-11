@@ -33,74 +33,69 @@ var jdp = (function() {
         //create the patterns;
         var regexFor = new RegExp(/\b(\w*endfor\w*)\b/);
         var regexIf = new RegExp(/\b(\w*endif\w*)\b/);
-        var regexElse = new RegExp(/\b(\w*else\w*)\b/);
-        //look for a bracket {% to %}
-            //now we found a bracket lets see if we can match it against a reserved word
-            var isFor = regexFor.test(statement);
-            console.log(isFor)
-            if (isFor == true) return ("for")
-            else {
-                //check if it is an if
-                var isIf = regexIf.test(statement);
-                if (isIf == true) return ("if")
-                else return (false)
-            }
+        var isFor = regexFor.test(statement);
+        if (isFor == true) return ("for")
+        else {
+            //check if it is an if
+            var isIf = regexIf.test(statement);
+            if (isIf == true) return ("if")
+            else return (false)
+        }
     }
 
     function parseDom(data) {
         //check that we have not processed the HTML
-        if (jdpSyntax.length == 0)
-        {
-                //get the html element
+        if (jdpSyntax.length == 0) {
+            //get the html element
             var html = document.documentElement.outerHTML
             for (var i = 0; i < html.length; i++) {
-
                 //look for {%
-                if ((html.charAt(i) == '{') && (html.charAt(i+1) == "%")) {
+                if ((html.charAt(i) == '{') && (html.charAt(i + 1) == "%")) {
                     //set an exit boolean
                     var exitIt = false;
                     //srt a counter
                     var countIt = 0;
                     //set a var to hold the statement
-                    let statement="";
+                    let statement = "";
                     //loop until we hot the exit condition
                     while (exitIt == false) {
                         //checj the counter
-                        if (countIt <= 3)
-                        {
+                        if (countIt <= 3) {
                             //check we are not at the end
-                            if (html.charAt(i) == "%")  countIt++;
-                        }
-                        else exitIt=true
+                            if (html.charAt(i) == "%") countIt++;
+                        } else exitIt = true
                         //add the statmenet
-                        statement=statement+html.charAt(i);
+                        statement = statement + html.charAt(i);
                         //inc the character counter
                         i++;
                     }
                     //add to the syntax array
-                    //todo we have to process this
                     let expression = checkElement(statement);
-
-                    let tmpObj = {type:"condtion",expression:expression,raw:statement}
+                    //build the object
+                    let tmpObj = {
+                        type: "condtion",
+                        expression: expression,
+                        raw: statement
+                    }
                     jdpSyntax.push(tmpObj)
-                }
-                else
-                {
+                } else {
                     //look for vars
-                    if ((html.charAt(i) == '{') && (html.charAt(i+1) == "{")) {
-                        i=i+2;
+                    if ((html.charAt(i) == '{') && (html.charAt(i + 1) == "{")) {
+                        i = i + 2;
                         //let i2=;
-                        let statement="";
+                        let statement = "";
                         while (html.charAt(i) != "}") {
-                            statement=statement+html.charAt(i)
+                            statement = statement + html.charAt(i)
                             //i2++;
                             i++;
                         }
-                        if (statement != "")
-                        {
+                        if (statement != "") {
                             //add to the syntax array
-                            //todo we have to process this
-                            let tmpObj = {type:"var",expression:"",raw:statement}
+                            let tmpObj = {
+                                type: "var",
+                                expression: "",
+                                raw: statement
+                            }
                             jdpSyntax.push(tmpObj)
                         }
                     }
@@ -138,6 +133,5 @@ var jdp = (function() {
             }
             */
         }
-
     };
 })();
