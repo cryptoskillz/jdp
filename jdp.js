@@ -43,11 +43,13 @@ var jdp = (function() {
         return(expression2)
     }
 
+    //this function parses the doms
     function parseDom(data) {
         //check that we have not processed the HTML
         if (jdpSyntax.length == 0) {
             //get the html element
-            var html = document.documentElement.outerHTML
+            var html = document.documentElement.outerHTML;
+            //lop through the elements
             for (var i = 0; i < html.length; i++) {
                 //look for {%
                 if ((html.charAt(i) == '{') && (html.charAt(i + 1) == "%")) {
@@ -69,6 +71,9 @@ var jdp = (function() {
                         //inc the character counter
                         i++;
                     }
+                    //remove the whitespace
+                    statement=  statement.replace(/\s+$/g, '');
+
                     //add to the syntax array
                     let expression = processExpression(statement);
                     //build the object
@@ -80,9 +85,6 @@ var jdp = (function() {
                         condtion4:expression[3],
                         raw: statement
                     }
-
-                    
-                    
                     jdpSyntax.push(tmpObj)
                 } else {
                     //look for vars
@@ -92,7 +94,6 @@ var jdp = (function() {
                         let statement = "";
                         while (html.charAt(i) != "}") {
                             statement = statement + html.charAt(i)
-                            //i2++;
                             i++;
                         }
                         if (statement != "") {
@@ -100,19 +101,91 @@ var jdp = (function() {
                             let tmpObj = {
                                 type: "var",
                                 expression: "",
-                                raw: statement
+                                raw: "{{"+statement+"}}"
                             }
                             jdpSyntax.push(tmpObj)
                         }
                     }
                 }
             }
+            //now loop through the elements
+            //loop through them
+            console.log(jdpSyntax);           
+            let tmpArray = []
+            for (var i = 0; i < elems.length; i++) {
+                elems[i].raw = elems[i].innerHTML.trim()
+                //match against the pattern we have in the HTML object.
+                console.log("ELM")
+                console.log(elems[i].raw);
+                //console.log(elems[i].innerHTML);
+                console.log("SYNATX")
+                for (var i2 =0; i2 < jdpSyntax.length; i2++)  {
+                    //console.log(jdpSyntax[i2].raw);
+                    console.log(jdpSyntax[i2].raw)
+                    if (jdpSyntax[i2].raw == elems[i].raw)
+                    {
+                        console.log('found ya')
+                        //console.log(jdpSyntax[i2].raw)
+                    }
+                }
+
+                /*
+                var regexBrackets = new RegExp('\{{([^)]+)\}}');
+                if (elems[i].tagName.toLowerCase() == "script")
+                    elems[i].remove();
+                //look for a bracket {% to %}
+                var isBracket = regexBrackets.test(elems[i].innerText);
+                if (isBracket == false)
+                    elems[i].remove();
+                */
+            }
+            //console.log("tmpArray")
+            //console.log(elems)
+        }
+    }
+
+    function processVar(data,theObj)
+    {
+        for (var i = 0; i < data.length; i++) {
+            //console.log(data[i])
+            var dataObj = data[i];
+            for (var key in dataObj) {
+                //check we have a key
+                if (dataObj.hasOwnProperty(key)) {
+                    //debug
+                    console.log(key + " -> " + dataObj[key]);
+                    //check if the key matches what is in the element text
+                    if (elementObj.text == '{{' + key + '}}') {
+                        //set the value
+                        theElement.innerText = dataObj[key];
+                        //if it is hidden (which it always should be) display it
+                        if (theElement.style.display === 'none') {
+                            theElement.style.display = "block";
+                        }
+                    }
+                    
+                }
+            }
         }
     }
     return {
         refreshDom: function(data) {
-            parseDom(data)
-            console.log(jdpSyntax)
+            parseDom(data);
+            return;
+            for (var i = 0; i < jdpSyntax.length; i++) {
+                //console.log(jdpSyntax[i].type)
+                switch (jdpSyntax[i].type) {
+                    case "for":
+                        //processFor(elementObj, elems[i], data)
+                        break;
+                    case "var":
+                        processVar(data,jdpSyntax[i].type)
+                        break;
+                    default:
+                        break;
+                }
+                
+            }
             return;
             /*
             //loop through them
